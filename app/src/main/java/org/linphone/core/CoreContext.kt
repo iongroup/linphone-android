@@ -19,6 +19,7 @@
  */
 package org.linphone.core
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.content.Intent
@@ -27,6 +28,7 @@ import android.graphics.PixelFormat
 import android.media.AudioDeviceCallback
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.security.keystore.KeyGenParameterSpec
@@ -36,6 +38,7 @@ import android.util.Base64
 import android.util.Pair
 import android.view.*
 import android.webkit.MimeTypeMap
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.*
 import androidx.loader.app.LoaderManager
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -168,8 +171,37 @@ class CoreContext(
             }
         }
 
+        //@SuppressLint("RestrictedApi")
+        //@RequiresApi(Build.VERSION_CODES.S)
         override fun onPushNotificationReceived(core: Core, payload: String?) {
             Log.i("[Context] Push notification received: $payload")
+            /*
+            if (payload != null) {
+                val data = JSONObject(payload)
+                val caller = data.getString("call-id")
+
+                val call = core.getCallByCallid(caller)
+                val notifiable = notificationsManager.getNotifiableForCall(call!!)
+
+                val declineIntent = notificationsManager.getCallDeclinePendingIntent(notifiable)
+                val answerIntent = notificationsManager.getCallAnswerPendingIntent(notifiable)
+
+                val person = notificationsManager.getPerson(null, caller, null)
+                // Create a call style notification for an incoming call.
+                val builder = Notification.Builder(
+                    context,
+                    context.getString(R.string.notification_channel_incoming_call_id)
+                )
+                    .setStyle(
+                        Notification.CallStyle.forIncomingCall(
+                            person.toAndroidPerson(),
+                            declineIntent,
+                            answerIntent
+                        )
+                    )
+                    .setCategory(Notification.CATEGORY_CALL)
+                    .setVisibility(Notification.VISIBILITY_PUBLIC)
+            }*/
         }
 
         override fun onCallStateChanged(
