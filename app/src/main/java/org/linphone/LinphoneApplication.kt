@@ -22,6 +22,9 @@ package org.linphone
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
+import android.os.AsyncTask
+import android.os.Build
+import androidx.annotation.RequiresApi
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.decode.GifDecoder
@@ -30,6 +33,9 @@ import coil.decode.SvgDecoder
 import coil.decode.VideoFrameDecoder
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
+import com.google.firebase.messaging.FirebaseMessaging
+import java.net.HttpURLConnection
+import java.net.URL
 import org.linphone.core.*
 import org.linphone.core.tools.Log
 import org.linphone.mediastream.Version
@@ -108,12 +114,47 @@ class LinphoneApplication : Application(), ImageLoaderFactory {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate() {
         super.onCreate()
         val appName = getString(R.string.app_name)
         android.util.Log.i("[$appName]", "Application is being created")
         createConfig(applicationContext)
         Log.i("[Application] Created")
+
+        FirebaseMessaging.getInstance()
+            .token
+            .addOnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    Log.e(
+                        "[Push Notification] Firebase getToken failed: " +
+                            task.exception
+                    )
+                } else {
+                    val token = task.result
+                    Log.i("[Push Notification] Token fetched from Firebase: $token")
+                    HttpClient().execute(
+                        "http://10.0.2.2:8091/add?user=android&type=firebase&token=$token"
+                    )
+                }
+            }
+    }
+
+    class HttpClient() : AsyncTask<String, Void, String>() {
+        @RequiresApi(Build.VERSION_CODES.N)
+        override fun doInBackground(vararg uri: String): String {
+            val url = URL(uri[0])
+
+            with(url.openConnection() as HttpURLConnection) {
+                requestMethod = "GET" // optional default is GET
+                inputStream.bufferedReader().use {
+                    it.lines().forEach { line ->
+                        println(line)
+                    }
+                }
+            }
+            return ""
+        }
     }
 
     override fun newImageLoader(): ImageLoader {
