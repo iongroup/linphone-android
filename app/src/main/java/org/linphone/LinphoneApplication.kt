@@ -134,7 +134,7 @@ class LinphoneApplication : Application(), ImageLoaderFactory {
                     val token = task.result
                     Log.i("[Push Notification] Token fetched from Firebase: $token")
                     HttpClient().execute(
-                        "http://10.0.2.2:8091/add?user=android&type=firebase&token=$token"
+                        "http://10.0.2.2:8091/add?user=android&topic=org.linphone.android&token=$token"
                     )
                 }
             }
